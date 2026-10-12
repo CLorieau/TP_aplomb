@@ -1,6 +1,6 @@
 # Aplomb — Technical Design Doc
 
-Auteur : à compléter · 12 octobre 2026 · URL de production : https://playful-kataifi-da7d5a.netlify.app · Dépôt : https://github.com/CLorieau/TP_aplomb · Statut : draft
+Auteur : Clément Lorieau · 12 octobre 2026 · URL de production : https://playful-kataifi-da7d5a.netlify.app · Dépôt : https://github.com/CLorieau/TP_aplomb · Statut : draft
 
 ## 1. TL;DR
 
@@ -93,7 +93,18 @@ Aucune. L'app n'a rien à annoncer en l'absence de l'utilisateur : la synchronis
 
 ## 11. Mesures
 
-À compléter après déploiement : Lighthouse (performance, SEO, PWA), résultats des commandes `curl` du README.
+Vérifications `curl` sur l'URL de production, le 12 octobre 2026 :
+
+| Vérification | Résultat |
+|---|---|
+| `curl -s -A "GPTBot" <url>/ \| grep -c "<h3>"` | 6 : les six sections du guide sont dans le HTML initial |
+| `robots.txt`, `sitemap.xml`, `llms.txt` | 200 pour les trois |
+| `curl -sI <url>/outils.md` | `text/markdown`, `X-Robots-Tag: noindex` |
+| `curl -sI <url>/sw.js` | `Cache-Control: no-cache` |
+| `http://` | redirigé en 301 vers `https://` |
+| `PUT` puis `GET` puis `DELETE` sur `/api/releves` | 200, relevé relu, 204 |
+
+Lighthouse (mobile) : à compléter — performance, accessibilité, bonnes pratiques, SEO, et les Core Web Vitals (LCP, CLS, INP).
 
 ## 12. Limites connues et suite
 
