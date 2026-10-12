@@ -1,6 +1,6 @@
 # Aplomb — Technical Design Doc
 
-Auteur : à compléter · 12 octobre 2026 · URL de production : à compléter · Dépôt : à compléter · Statut : draft
+Auteur : à compléter · 12 octobre 2026 · URL de production : https://playful-kataifi-da7d5a.netlify.app · Dépôt : https://github.com/CLorieau/TP_aplomb · Statut : draft
 
 ## 1. TL;DR
 

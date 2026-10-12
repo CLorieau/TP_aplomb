@@ -22,5 +22,5 @@ Disallow: /         # pas d'entraînement de Gemini ; la recherche Google reste 
 User-agent: CCBot
 Disallow: /         # collecte en masse pour l'entraînement, sans citation en retour
 
-Sitemap: https://VOTRE-SITE.netlify.app/sitemap.xml
-# llms.txt : https://VOTRE-SITE.netlify.app/llms.txt
+Sitemap: https://playful-kataifi-da7d5a.netlify.app/sitemap.xml
+# llms.txt : https://playful-kataifi-da7d5a.netlify.app/llms.txt

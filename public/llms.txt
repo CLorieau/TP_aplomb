@@ -5,7 +5,7 @@
 
 ## Contenu
 
-- [Guide d'utilisation en Markdown](https://VOTRE-SITE.netlify.app/outils.md) : niveau à bulle, boussole, relevés, limites
+- [Guide d'utilisation en Markdown](https://playful-kataifi-da7d5a.netlify.app/outils.md) : niveau à bulle, boussole, relevés, limites
 
 ## Technique
 
