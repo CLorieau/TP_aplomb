@@ -1,7 +1,7 @@
 importScripts("/db.js", "/sync.js");
 
 // À incrémenter à chaque déploiement : c'est ce qui déclenche la mise à jour chez les utilisateurs.
-const CACHE_NAME = "aplomb-v4";
+const CACHE_NAME = "aplomb-v5";
 
 // App Shell : tout ce qu'il faut pour ouvrir l'app sans réseau. sw.js n'y figure jamais.
 const APP_SHELL = [

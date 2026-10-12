@@ -132,7 +132,7 @@ export async function traiter(request, stockage, push = null) {
     if (!releve) return json(400, { erreur: "Relevé invalide" });
     await stockage.ecrire(cle, releve);
 
-    // Le client signale un relevé resté en attente (pris hors ligne) : on confirme son arrivée.
+    // Le client signale un relevé dont un premier envoi a échoué (pris hors ligne) : on confirme son arrivée.
     // Même tag pour toute la série : une seule notification, pas une par relevé.
     if (request.headers.get("X-Differe") === "1") {
       await notifier(stockage, push, appareil, {

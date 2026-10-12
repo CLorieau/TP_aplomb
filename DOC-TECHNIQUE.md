@@ -55,7 +55,7 @@ Le cours conseille Stale While Revalidate pour le HTML. Cache First a été pré
 | Store | Clé | Contenu |
 |---|---|---|
 | `releves` | `id` (UUID créé sur l'appareil) | `outil`, `valeur`, `mode`, `x`, `y`, `note`, `createdAt`, `etat` (attente / envoyé / refusé) |
-| `outbox` | `seq` (auto-incrément) | `op` (put / delete), `id`, copie du relevé |
+| `outbox` | `seq` (auto-incrément) | `op` (put / delete), `id`, copie du relevé, `differe` (un envoi a déjà échoué) |
 | `meta` | `key` | identifiant de l'appareil, étalonnage du niveau |
 
 - **Outbox** : chaque enregistrement ou suppression écrit le relevé et son ordre d'envoi dans la même transaction. L'envoi (`sync.js`) parcourt l'outbox dans l'ordre et retire chaque entrée acceptée.
@@ -78,7 +78,7 @@ Sans capteur (ordinateur), un message le dit après 2,5 s sans mesure. Sans cap 
 - **Type** : notifications **push** (Web Push + VAPID, librairie `web-push` côté serveur), facultatives.
 - **Permission** : demandée à l'appui sur « Activer les notifications », dans l'onglet Relevés, sous le texte qui explique à quoi elles servent. Jamais au chargement. En cas de refus, un message rappelle que l'état des relevés reste visible dans la liste.
 - **Abonnement** : la page récupère la clé publique (`GET /api/push`), s'abonne (`pushManager.subscribe`) et dépose l'abonnement au serveur (`PUT /api/push`), rattaché à l'identifiant de l'appareil.
-- **Contenu** : « Relevés synchronisés », envoyée quand le serveur reçoit un relevé resté plus de 30 s en attente (en-tête `X-Differe` posé par `sync.js`). C'est le cas utile : Background Sync a envoyé l'outbox alors que l'app était fermée, et rien d'autre ne le dirait à l'utilisateur. Un même `tag` regroupe la série en une seule notification.
+- **Contenu** : « Relevés synchronisés », envoyée quand le serveur reçoit un relevé dont un premier envoi avait échoué (entrée de l'outbox marquée `differe`, signalée par l'en-tête `X-Differe` de `sync.js`). C'est le cas utile : Background Sync a envoyé l'outbox alors que l'app était fermée, et rien d'autre ne le dirait à l'utilisateur. Un même `tag` regroupe la série en une seule notification.
 - **Au clic** : l'app est ramenée au premier plan (ou ouverte) sur l'onglet Relevés.
 - **Abonnement expiré** : si le service de push répond 404 ou 410, le serveur supprime l'abonnement.
 
