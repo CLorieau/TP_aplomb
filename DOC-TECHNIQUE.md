@@ -78,7 +78,7 @@ Sans capteur (ordinateur), un message le dit après 2,5 s sans mesure. Sans cap 
 - **Type** : notifications **push** (Web Push + VAPID, librairie `web-push` côté serveur), facultatives.
 - **Permission** : demandée à l'appui sur « Activer les notifications », dans l'onglet Relevés, sous le texte qui explique à quoi elles servent. Jamais au chargement. En cas de refus, un message rappelle que l'état des relevés reste visible dans la liste.
 - **Abonnement** : la page récupère la clé publique (`GET /api/push`), s'abonne (`pushManager.subscribe`) et dépose l'abonnement au serveur (`PUT /api/push`), rattaché à l'identifiant de l'appareil.
-- **Contenu** : « Relevés synchronisés », envoyée quand le serveur reçoit un relevé resté plus de 30 s en attente (en-tête `X-Differe` posé par `sync.js`). C'est le cas utile : Background Sync a envoyé l'outbox alors que l'app était fermée, et rien d'autre ne le dirait à l'utilisateur. Un même `tag` regroupe la série en une seule notification. Un bouton « Envoyer un test » permet de vérifier la chaîne.
+- **Contenu** : « Relevés synchronisés », envoyée quand le serveur reçoit un relevé resté plus de 30 s en attente (en-tête `X-Differe` posé par `sync.js`). C'est le cas utile : Background Sync a envoyé l'outbox alors que l'app était fermée, et rien d'autre ne le dirait à l'utilisateur. Un même `tag` regroupe la série en une seule notification.
 - **Au clic** : l'app est ramenée au premier plan (ou ouverte) sur l'onglet Relevés.
 - **Abonnement expiré** : si le service de push répond 404 ou 410, le serveur supprime l'abonnement.
 

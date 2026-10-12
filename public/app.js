@@ -376,7 +376,7 @@ async function majEtatNotifications() {
   const reg = await navigator.serviceWorker.getRegistration();
   const abonnement = (await reg?.pushManager.getSubscription()) ?? null;
   $("#btn-notifs").hidden = Boolean(abonnement);
-  $("#btn-notifs-test").hidden = $("#btn-notifs-off").hidden = !abonnement;
+  $("#btn-notifs-off").hidden = !abonnement;
   return abonnement;
 }
 
@@ -421,11 +421,6 @@ async function desactiverNotifications() {
   toast("Notifications désactivées.");
 }
 
-async function testerNotification() {
-  const rep = await fetch("/api/push/test", { method: "POST", headers: await enTetesApi() }).catch(() => null);
-  toast(rep?.ok ? "Notification de test envoyée." : "Envoi impossible : vérifiez la connexion.");
-}
-
 // ---------------------------------------------------------------- Installation
 
 let invitationInstallation = null;
@@ -450,7 +445,6 @@ async function demarrer() {
   $("#btn-sync").addEventListener("click", () => synchroniser({ manuel: true }));
   $("#btn-notifs").addEventListener("click", activerNotifications);
   $("#btn-notifs-off").addEventListener("click", desactiverNotifications);
-  $("#btn-notifs-test").addEventListener("click", testerNotification);
   $("#btn-installer").addEventListener("click", async () => {
     if (!invitationInstallation) return;
     invitationInstallation.prompt();

@@ -17,4 +17,4 @@ export default (request) => {
   return traiter(request, stockage, push);
 };
 
-export const config = { path: ["/api/releves", "/api/releves/:id", "/api/push", "/api/push/test"] };
+export const config = { path: ["/api/releves", "/api/releves/:id", "/api/push"] };

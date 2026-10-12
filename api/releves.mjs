@@ -9,7 +9,6 @@
 //   GET    /api/push           → la clé publique VAPID, nécessaire au navigateur pour s'abonner
 //   PUT    /api/push           → enregistre l'abonnement push de l'appareil
 //   DELETE /api/push           → le supprime
-//   POST   /api/push/test      → envoie une notification de test à l'appareil
 //
 // L'appareil s'identifie par l'en-tête X-Device-Id (UUID aléatoire créé côté client).
 
@@ -86,19 +85,8 @@ async function notifier(stockage, push, appareil, message) {
   }
 }
 
-async function traiterPush(request, stockage, push, appareil, action) {
+async function traiterPush(request, stockage, push, appareil) {
   if (!push) return json(503, { erreur: "Notifications non configurées sur ce serveur" });
-
-  if (action === "test" && request.method === "POST") {
-    const envoyee = await notifier(stockage, push, appareil, {
-      title: "Aplomb",
-      body: "Les notifications fonctionnent sur cet appareil.",
-      tag: "test",
-      url: "/#releves",
-    });
-    return envoyee ? json(204) : json(404, { erreur: "Aucun abonnement actif pour cet appareil" });
-  }
-  if (action) return json(405, { erreur: "Méthode non autorisée" });
 
   if (request.method === "GET") return json(200, { clePublique: push.clePublique });
   if (request.method === "PUT") {
@@ -119,7 +107,7 @@ export async function traiter(request, stockage, push = null) {
   if (!UUID.test(appareil)) return json(400, { erreur: "En-tête X-Device-Id manquant ou invalide" });
 
   const [, , ressource, id] = new URL(request.url).pathname.split("/"); // /api/<ressource>/<id>
-  if (ressource === "push") return traiterPush(request, stockage, push, appareil, id);
+  if (ressource === "push") return traiterPush(request, stockage, push, appareil);
 
   if (!id) {
     if (request.method !== "GET") return json(405, { erreur: "Méthode non autorisée" });
