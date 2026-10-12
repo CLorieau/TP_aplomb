@@ -1,0 +1,8 @@
+# Netlify lit ce fichier à l'import du dépôt : aucun réglage à saisir dans l'interface.
+# Pas de commande de build : public/ est servi tel quel. Les en-têtes HTTP sont dans public/_headers.
+[build]
+  publish = "public"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

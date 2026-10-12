@@ -1,0 +1,14 @@
+# Aplomb
+
+> Niveau à bulle et boussole installables sur téléphone, utilisables hors ligne, avec un journal de relevés synchronisé au retour du réseau.
+> Projet du cours PWA, M2 Informatique, Università di Corsica.
+
+## Contenu
+
+- [Guide d'utilisation en Markdown](https://VOTRE-SITE.netlify.app/outils.md) : niveau à bulle, boussole, relevés, limites
+
+## Technique
+
+- Vanilla : Service Worker, API Cache, IndexedDB, Background Sync, Web App Manifest
+- Capteurs : DeviceOrientationEvent (niveau, boussole), Screen Wake Lock
+- Serveur : Netlify Functions et Netlify Blobs

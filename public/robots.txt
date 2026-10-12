@@ -1,0 +1,26 @@
+# robots.txt — Aplomb
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Crawlers d'IA : une décision par robot, avec sa raison
+User-agent: GPTBot
+Allow: /            # le guide public gagne à être cité par ChatGPT
+Disallow: /api/
+
+User-agent: ClaudeBot
+Allow: /            # idem pour Claude
+Disallow: /api/
+
+User-agent: PerplexityBot
+Allow: /            # moteur de réponse qui cite ses sources
+Disallow: /api/
+
+User-agent: Google-Extended
+Disallow: /         # pas d'entraînement de Gemini ; la recherche Google reste ouverte
+
+User-agent: CCBot
+Disallow: /         # collecte en masse pour l'entraînement, sans citation en retour
+
+Sitemap: https://VOTRE-SITE.netlify.app/sitemap.xml
+# llms.txt : https://VOTRE-SITE.netlify.app/llms.txt

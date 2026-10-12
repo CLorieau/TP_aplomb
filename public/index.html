@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aplomb — niveau à bulle et boussole hors ligne</title>
+  <meta name="description" content="Niveau à bulle et boussole installables sur téléphone, utilisables sans réseau. Enregistrez vos relevés : ils se synchronisent au retour de la connexion.">
+  <link rel="canonical" href="https://VOTRE-SITE.netlify.app/">
+  <link rel="alternate" type="text/markdown" href="/outils.md">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0f766e">
+  <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
+  <!-- iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Aplomb — niveau à bulle et boussole hors ligne">
+  <meta property="og:description" content="Niveau à bulle et boussole installables, utilisables sans réseau, avec un journal de relevés synchronisé.">
+  <meta property="og:image" content="https://VOTRE-SITE.netlify.app/icons/icon-512.png">
+  <meta property="og:url" content="https://VOTRE-SITE.netlify.app/">
+  <script type="application/ld+json">
+  { "@context": "https://schema.org", "@type": "WebApplication",
+    "name": "Aplomb", "applicationCategory": "UtilitiesApplication",
+    "operatingSystem": "Any", "url": "https://VOTRE-SITE.netlify.app/",
+    "description": "Niveau à bulle et boussole installables et utilisables hors ligne, avec un journal de relevés.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" } }
+  </script>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/db.js" defer></script>
+  <script src="/sync.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="entete">
+    <div>
+      <h1>Aplomb</h1>
+      <p class="accroche">Niveau à bulle et boussole, même sans réseau.</p>
+    </div>
+    <div class="entete-actions">
+      <span id="etat-reseau" class="pastille">En ligne</span>
+      <button id="btn-installer" class="bouton-discret" hidden>Installer</button>
+    </div>
+  </header>
+
+  <div id="bandeau-maj" class="bandeau bandeau-maj" role="status" hidden>
+    <span>Nouvelle version disponible.</span>
+    <button id="btn-maj">Mettre à jour</button>
+  </div>
+  <div id="bandeau-hors-ligne" class="bandeau" role="status" hidden>
+    Hors ligne : les outils fonctionnent, l'envoi des relevés reprendra au retour du réseau.
+  </div>
+
+  <nav class="onglets" aria-label="Outils">
+    <a href="#niveau">Niveau</a>
+    <a href="#boussole">Boussole</a>
+    <a href="#releves">Relevés</a>
+    <a href="#guide">Guide</a>
+  </nav>
+
+  <main>
+    <section id="capteurs" class="carte">
+      <p>Le niveau et la boussole lisent les capteurs d'orientation du téléphone. Rien n'est mesuré tant que vous ne les avez pas activés.</p>
+      <button id="btn-capteurs" class="bouton-principal">Activer les capteurs</button>
+      <p id="capteurs-message" class="message" role="alert"></p>
+    </section>
+
+    <label id="ecran-allume-ligne" class="option" hidden>
+      <input type="checkbox" id="ecran-allume"> Garder l'écran allumé pendant la mesure
+    </label>
+
+    <section id="niveau" data-vue data-outil>
+      <h2>Niveau à bulle</h2>
+      <div id="niveau-visuel" class="niveau-visuel" data-mode="plat" aria-hidden="true">
+        <div class="fiole"><div class="cible"></div><div id="bulle-plat" class="bulle"></div></div>
+        <div id="chant" class="chant"><div class="tube"><div id="bulle-chant" class="bulle"></div></div></div>
+      </div>
+      <p class="lecture"><output id="niveau-valeur">–</output></p>
+      <p id="niveau-detail" class="lecture-detail">Posez le téléphone à plat ou sur la tranche.</p>
+      <div class="actions">
+        <button id="btn-etalonner" disabled>Étalonner</button>
+        <button id="btn-raz-etalonnage" class="bouton-discret" disabled>Annuler l'étalonnage</button>
+      </div>
+      <form id="form-niveau" class="saisie">
+        <input id="note-niveau" maxlength="140" placeholder="Note (facultatif) : étagère du salon…" aria-label="Note du relevé">
+        <button class="bouton-principal" disabled>Enregistrer</button>
+      </form>
+    </section>
+
+    <section id="boussole" data-vue data-outil>
+      <h2>Boussole</h2>
+      <div class="boussole-visuel" aria-hidden="true">
+        <div class="repere"></div>
+        <svg id="rose" viewBox="-100 -100 200 200">
+          <circle r="96" class="rose-fond"/>
+          <g id="rose-graduations"></g>
+          <text y="-58" class="rose-nord">N</text>
+          <text x="66" y="7">E</text>
+          <text y="72">S</text>
+          <text x="-66" y="7">O</text>
+          <path d="M0 -46 L7 0 L-7 0 Z" class="aiguille-nord"/>
+          <path d="M0 46 L7 0 L-7 0 Z" class="aiguille-sud"/>
+        </svg>
+      </div>
+      <p class="lecture"><output id="boussole-valeur">–</output></p>
+      <p id="boussole-detail" class="lecture-detail">Tenez le téléphone à plat, loin des objets métalliques.</p>
+      <form id="form-boussole" class="saisie">
+        <input id="note-boussole" maxlength="140" placeholder="Note (facultatif) : direction du col…" aria-label="Note du relevé">
+        <button class="bouton-principal" disabled>Enregistrer</button>
+      </form>
+    </section>
+
+    <section id="releves" data-vue>
+      <h2>Mes relevés</h2>
+      <div class="actions">
+        <span id="releves-resume" class="lecture-detail"></span>
+        <button id="btn-sync">Synchroniser</button>
+      </div>
+      <p id="releves-vide" class="message">Aucun relevé pour l'instant. Enregistrez une mesure depuis le niveau ou la boussole.</p>
+      <ul id="liste-releves" class="liste-releves"></ul>
+    </section>
+
+    <section id="guide" data-vue>
+      <h2>Guide</h2>
+      <article>
+        <h3>À quoi sert Aplomb ?</h3>
+        <p>Aplomb transforme un téléphone en deux outils de terrain : un niveau à bulle pour vérifier qu'une surface est horizontale ou verticale, et une boussole pour relever une direction. L'application s'installe sur l'écran d'accueil et fonctionne sans connexion, sur un chantier comme en montagne.</p>
+      </article>
+      <article>
+        <h3>Utiliser le niveau à bulle</h3>
+        <ul>
+          <li><strong>À plat</strong> : posez le téléphone écran vers le haut sur la surface. La bulle se déplace vers le côté le plus haut ; elle est au centre quand la surface est horizontale.</li>
+          <li><strong>Sur chant</strong> : posez le téléphone sur la tranche, comme un niveau de maçon. L'écart affiché est mesuré par rapport à l'horizontale ou à la verticale la plus proche.</li>
+          <li><strong>Étalonner</strong> : posez le téléphone sur une surface de référence et appuyez sur « Étalonner » pour compenser le décalage du capteur ou de la coque.</li>
+        </ul>
+        <p>Le niveau est considéré comme atteint en dessous de 0,5° d'écart.</p>
+      </article>
+      <article>
+        <h3>Utiliser la boussole</h3>
+        <ul>
+          <li>Tenez le téléphone à plat : le cap affiché est la direction pointée par le haut de l'appareil, en degrés depuis le nord (0° nord, 90° est, 180° sud, 270° ouest).</li>
+          <li>La boussole indique le <strong>nord magnétique</strong>, pas le nord géographique des cartes. L'écart entre les deux, la déclinaison magnétique, dépend du lieu et de l'année.</li>
+          <li>Éloignez-vous des masses métalliques, des aimants et des enceintes. Si le cap dérive, décrivez un « 8 » dans l'air avec le téléphone pour réétalonner le magnétomètre.</li>
+        </ul>
+      </article>
+      <article>
+        <h3>Relevés et synchronisation</h3>
+        <p>Chaque mesure peut être enregistrée avec une note. Les relevés sont conservés sur l'appareil et restent consultables hors ligne. Ceux qui ont été pris sans réseau sont marqués « En attente » et envoyés automatiquement au retour de la connexion.</p>
+      </article>
+      <article>
+        <h3>Précision et limites</h3>
+        <p>Les capteurs d'un téléphone donnent une mesure indicative. Aplomb ne remplace pas un instrument étalonné pour un travail qui engage la sécurité. Sur un ordinateur sans capteur d'orientation, les outils ne sont pas disponibles.</p>
+      </article>
+      <article>
+        <h3>Vie privée</h3>
+        <p>Aplomb ne demande ni compte ni position. Seuls les relevés que vous enregistrez sont envoyés au serveur, rattachés à un identifiant aléatoire propre à l'appareil.</p>
+      </article>
+    </section>
+  </main>
+
+  <noscript><p class="message">Les outils de mesure nécessitent JavaScript. Le guide ci-dessus reste lisible.</p></noscript>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
