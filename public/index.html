@@ -117,6 +117,17 @@
       </div>
       <p id="releves-vide" class="message">Aucun relevé pour l'instant. Enregistrez une mesure depuis le niveau ou la boussole.</p>
       <ul id="liste-releves" class="liste-releves"></ul>
+
+      <section class="carte notifications" aria-labelledby="notifs-titre">
+        <h3 id="notifs-titre">Notifications</h3>
+        <p>Recevez une notification quand des relevés pris hors ligne sont arrivés au serveur, même si l'application est fermée.</p>
+        <div class="actions">
+          <button id="btn-notifs" class="bouton-principal">Activer les notifications</button>
+          <button id="btn-notifs-test" hidden>Envoyer un test</button>
+          <button id="btn-notifs-off" class="bouton-discret" hidden>Désactiver</button>
+        </div>
+        <p id="notifs-message" class="message" role="status"></p>
+      </section>
     </section>
 
     <section id="guide" data-vue>
@@ -144,7 +155,7 @@
       </article>
       <article>
         <h3>Relevés et synchronisation</h3>
-        <p>Chaque mesure peut être enregistrée avec une note. Les relevés sont conservés sur l'appareil et restent consultables hors ligne. Ceux qui ont été pris sans réseau sont marqués « En attente » et envoyés automatiquement au retour de la connexion.</p>
+        <p>Chaque mesure peut être enregistrée avec une note. Les relevés sont conservés sur l'appareil et restent consultables hors ligne. Ceux qui ont été pris sans réseau sont marqués « En attente » et envoyés automatiquement au retour de la connexion. Si vous activez les notifications, Aplomb vous prévient quand ces relevés sont arrivés.</p>
       </article>
       <article>
         <h3>Précision et limites</h3>
@@ -152,7 +163,7 @@
       </article>
       <article>
         <h3>Vie privée</h3>
-        <p>Aplomb ne demande ni compte ni position. Seuls les relevés que vous enregistrez sont envoyés au serveur, rattachés à un identifiant aléatoire propre à l'appareil.</p>
+        <p>Aplomb ne demande ni compte ni position. Seuls les relevés que vous enregistrez sont envoyés au serveur, rattachés à un identifiant aléatoire propre à l'appareil. Les notifications sont facultatives et se désactivent depuis l'onglet Relevés.</p>
       </article>
     </section>
   </main>

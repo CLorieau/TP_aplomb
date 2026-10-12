@@ -9,13 +9,15 @@ TP PWA — M2 Informatique, Università di Corsica.
 
 ## Lancer en local
 
-Node 20 ou plus, aucune installation de dépendance :
+Node 20 ou plus :
 
 ```bash
 node server.mjs
 ```
 
 Puis ouvrir http://localhost:8080. Les relevés reçus par le serveur local sont écrits dans `.data/releves.json`.
+
+Le serveur démarre sans aucune dépendance. Pour avoir aussi les notifications push en local, lancer `npm install` et créer un fichier `.env` (ignoré par Git) avec `VAPID_PUBLIC_KEY` et `VAPID_PRIVATE_KEY`.
 
 Les capteurs d'orientation n'existent que sur téléphone. Sur ordinateur, Chrome les simule : DevTools → ⋮ → More tools → Sensors → Orientation.
 
@@ -33,6 +35,7 @@ public/               servi tel quel par Netlify
   robots.txt, sitemap.xml, llms.txt, outils.md
   _headers            en-têtes HTTP (CSP, noindex sur le Markdown…)
 api/releves.mjs       logique de l'API, partagée par les deux serveurs
+api/push.mjs          envoi des notifications push (web-push, VAPID)
 netlify/functions/    l'API en production (Netlify Functions + Netlify Blobs)
 server.mjs            serveur local (fichiers + API)
 netlify.toml          configuration du déploiement
@@ -42,7 +45,8 @@ netlify.toml          configuration du déploiement
 
 1. Pousser ce dossier dans un dépôt Git public.
 2. Sur Netlify : **Add new site → Import an existing project**, choisir le dépôt. `netlify.toml` fournit tous les réglages (dossier publié `public`, pas de commande de build) ; Netlify installe `@netlify/blobs` et déploie la fonction tout seul.
-3. L'adresse du site est écrite en dur dans `public/index.html`, `robots.txt`, `sitemap.xml`, `llms.txt` et ce README : si elle change, la remplacer partout, puis pousser.
+3. Dans Netlify, **Site configuration → Environment variables**, ajouter `VAPID_PUBLIC_KEY` et `VAPID_PRIVATE_KEY` (paire générée avec `npx web-push generate-vapid-keys`), puis relancer un déploiement. Sans elles, l'app fonctionne mais les notifications sont indisponibles.
+4. L'adresse du site est écrite en dur dans `public/index.html`, `robots.txt`, `sitemap.xml`, `llms.txt` et ce README : si elle change, la remplacer partout, puis pousser.
 
 ### À chaque redéploiement
 

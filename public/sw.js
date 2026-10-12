@@ -1,7 +1,7 @@
 importScripts("/db.js", "/sync.js");
 
 // À incrémenter à chaque déploiement : c'est ce qui déclenche la mise à jour chez les utilisateurs.
-const CACHE_NAME = "aplomb-v2";
+const CACHE_NAME = "aplomb-v3";
 
 // App Shell : tout ce qu'il faut pour ouvrir l'app sans réseau. sw.js n'y figure jamais.
 const APP_SHELL = [
@@ -74,3 +74,30 @@ self.addEventListener("sync", (event) => {
 async function prevenirLesPages() {
   for (const client of await self.clients.matchAll()) client.postMessage({ type: "SYNC_OK" });
 }
+
+// Notifications push : le serveur envoie { title, body, tag, url }.
+// Chaque push doit afficher une notification (userVisibleOnly), sinon le navigateur retire l'abonnement.
+self.addEventListener("push", (event) => {
+  const data = event.data?.json() ?? {};
+  event.waitUntil(
+    self.registration.showNotification(data.title ?? "Aplomb", {
+      body: data.body,
+      icon: "/icons/icon-192.png",
+      tag: data.tag, // même tag = une seule notification, remplacée, plutôt qu'une pile
+      data: { url: data.url ?? "/" },
+    }),
+  );
+});
+
+// Au clic : ramener l'app déjà ouverte au premier plan, sinon l'ouvrir.
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const { url } = event.notification.data;
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(([ouverte]) => {
+      if (!ouverte) return self.clients.openWindow(url);
+      ouverte.postMessage({ type: "OUVRIR", url });
+      return ouverte.focus();
+    }),
+  );
+});

@@ -9,13 +9,13 @@ Aplomb transforme un téléphone en niveau à bulle et en boussole, et garde un 
 ## 2. Contexte et objectifs
 
 - **Problème** : un outil de mesure doit s'ouvrir tout de suite, y compris sans réseau, et ne pas perdre une mesure prise hors ligne. Sujet libre.
-- **Goals** : niveau (à plat et sur chant) avec étalonnage ; boussole ; relevés enregistrés avec une note, consultables hors ligne, synchronisés au retour du réseau ; guide public lisible par les moteurs et les agents IA.
-- **Non-goals** : pas de compte utilisateur, pas de géolocalisation, pas de consultation des relevés depuis un autre appareil, pas de notifications.
+- **Goals** : niveau (à plat et sur chant) avec étalonnage ; boussole ; relevés enregistrés avec une note, consultables hors ligne, synchronisés au retour du réseau ; notification push qui confirme l'arrivée des relevés pris hors ligne ; guide public lisible par les moteurs et les agents IA.
+- **Non-goals** : pas de compte utilisateur, pas de géolocalisation, pas de consultation des relevés depuis un autre appareil.
 
 ## 3. Architecture
 
 - **Stack** : HTML/CSS/JavaScript sans framework ni étape de build. Service Worker écrit à la main. IndexedDB via un petit wrapper maison (`db.js`) plutôt que `idb` : le même fichier est chargé par la page et par le Service Worker (`importScripts`), et rien ne dépend d'un CDN hors ligne.
-- **Serveur** : une Netlify Function (`/api/releves`) qui stocke dans Netlify Blobs. La logique est dans `api/releves.mjs`, réutilisée par le serveur local `server.mjs`.
+- **Serveur** : une Netlify Function (`/api/releves`, `/api/push`) qui stocke dans Netlify Blobs et envoie les notifications avec la librairie `web-push`. La logique est dans `api/releves.mjs` et `api/push.mjs`, réutilisée par le serveur local `server.mjs`.
 
 ```
 page (app.js) ──► IndexedDB : releves, outbox, meta ◄── Service Worker (sync)
@@ -24,6 +24,8 @@ page (app.js) ──► IndexedDB : releves, outbox, meta ◄── Service Work
      └──────────── PUT / DELETE /api/releves/<id> ────────────┘
                                │
                  Netlify Function ──► Netlify Blobs
+                               │ web-push (VAPID)
+                 service de push du navigateur ──► Service Worker (push) ──► notification
 ```
 
 - **Hébergement** : Netlify, déploiement à chaque `git push` ; `netlify.toml` publie `public/` sans build.
@@ -73,7 +75,12 @@ Sans capteur (ordinateur), un message le dit après 2,5 s sans mesure. Sans cap 
 
 ## 8. Notifications
 
-Aucune. L'app n'a rien à annoncer en l'absence de l'utilisateur : la synchronisation est silencieuse et son état est visible dans la liste.
+- **Type** : notifications **push** (Web Push + VAPID, librairie `web-push` côté serveur), facultatives.
+- **Permission** : demandée à l'appui sur « Activer les notifications », dans l'onglet Relevés, sous le texte qui explique à quoi elles servent. Jamais au chargement. En cas de refus, un message rappelle que l'état des relevés reste visible dans la liste.
+- **Abonnement** : la page récupère la clé publique (`GET /api/push`), s'abonne (`pushManager.subscribe`) et dépose l'abonnement au serveur (`PUT /api/push`), rattaché à l'identifiant de l'appareil.
+- **Contenu** : « Relevés synchronisés », envoyée quand le serveur reçoit un relevé resté plus de 30 s en attente (en-tête `X-Differe` posé par `sync.js`). C'est le cas utile : Background Sync a envoyé l'outbox alors que l'app était fermée, et rien d'autre ne le dirait à l'utilisateur. Un même `tag` regroupe la série en une seule notification. Un bouton « Envoyer un test » permet de vérifier la chaîne.
+- **Au clic** : l'app est ramenée au premier plan (ou ouverte) sur l'onglet Relevés.
+- **Abonnement expiré** : si le service de push répond 404 ou 410, le serveur supprime l'abonnement.
 
 ## 9. Visibilité : SEO et agents IA
 
@@ -85,8 +92,9 @@ Aucune. L'app n'a rien à annoncer en l'absence de l'utilisateur : la synchronis
 ## 10. Sécurité et vie privée
 
 - **Sur l'appareil** : relevés, étalonnage, identifiant aléatoire.
-- **Au serveur** : uniquement les relevés enregistrés, rattachés à cet identifiant. Ni compte, ni position, ni donnée brute des capteurs.
-- **Secrets** : aucun côté client. Netlify Blobs est accessible à la fonction sans clé à configurer.
+- **Au serveur** : les relevés enregistrés et, si l'utilisateur l'a activé, son abonnement push, rattachés à cet identifiant. Ni compte, ni position, ni donnée brute des capteurs.
+- **Secrets** : aucun côté client ni dans le dépôt. La clé privée VAPID est une variable d'environnement Netlify (`.env` ignoré par Git en local) ; seule la clé publique est servie au navigateur. Netlify Blobs est accessible à la fonction sans clé à configurer.
+- **Abonnement push** : le serveur n'accepte que les adresses des services de push des navigateurs, pour ne pas envoyer de requête vers une URL choisie par un client.
 - **Serveur** : chaque relevé est validé et recopié champ par champ (types, taille, note limitée à 140 caractères).
 - **Affichage** : les notes sont insérées avec `textContent`, jamais `innerHTML`.
 - **En-têtes** (`_headers`) : CSP `default-src 'self'`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy` limitée aux capteurs utilisés.
@@ -110,6 +118,7 @@ Lighthouse (mobile) : à compléter — performance, accessibilité, bonnes prat
 
 - L'identifiant d'appareil sert de seul contrôle d'accès : qui le connaît peut lire les relevés correspondants. L'API n'a ni authentification ni limite de débit.
 - Background Sync n'existe que sur Chromium ; ailleurs, l'envoi attend la réouverture de l'app.
+- Push : sur iPhone, seulement si l'app est installée sur l'écran d'accueil (iOS 16.4+). Un seul abonnement par appareil.
 - La boussole dépend du navigateur : `webkitCompassHeading` sur iOS, `deviceorientationabsolute` sur Android. Elle donne le nord magnétique, sans correction de déclinaison.
 - `CACHE_NAME` s'incrémente à la main.
 - v2 : géolocalisation des relevés, export, restauration des relevés depuis le serveur.

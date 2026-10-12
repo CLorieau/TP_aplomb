@@ -6,3 +6,5 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+  # web-push est un module CommonJS : livré tel quel depuis node_modules plutôt que regroupé par esbuild.
+  external_node_modules = ["web-push"]

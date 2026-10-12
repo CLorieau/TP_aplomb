@@ -22,7 +22,7 @@ Le niveau est considéré comme atteint en dessous de 0,5° d'écart.
 
 ## Relevés et synchronisation
 
-Chaque mesure peut être enregistrée avec une note. Les relevés sont conservés sur l'appareil et restent consultables hors ligne. Ceux qui ont été pris sans réseau sont envoyés automatiquement au retour de la connexion.
+Chaque mesure peut être enregistrée avec une note. Les relevés sont conservés sur l'appareil et restent consultables hors ligne. Ceux qui ont été pris sans réseau sont envoyés automatiquement au retour de la connexion. Si les notifications sont activées, Aplomb prévient quand ces relevés sont arrivés.
 
 ## Précision et limites
 
@@ -30,4 +30,4 @@ Les capteurs d'un téléphone donnent une mesure indicative. Aplomb ne remplace 
 
 ## Vie privée
 
-Aplomb ne demande ni compte ni position. Seuls les relevés enregistrés sont envoyés au serveur, rattachés à un identifiant aléatoire propre à l'appareil.
+Aplomb ne demande ni compte ni position. Seuls les relevés enregistrés sont envoyés au serveur, rattachés à un identifiant aléatoire propre à l'appareil. Les notifications sont facultatives.

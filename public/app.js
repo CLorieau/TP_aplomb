@@ -353,7 +353,77 @@ async function enregistrerServiceWorker() {
   });
   navigator.serviceWorker.addEventListener("message", (event) => {
     if (event.data?.type === "SYNC_OK") afficherReleves();
+    if (event.data?.type === "OUVRIR") location.hash = new URL(event.data.url, location.href).hash; // clic sur une notification
   });
+}
+
+// ---------------------------------------------------------------- Notifications push
+
+const enTetesApi = async () => ({ "Content-Type": "application/json", "X-Device-Id": await getDeviceId() });
+
+// pushManager.subscribe attend la clé publique VAPID en octets ; le serveur la donne en base64url.
+const cleEnOctets = (base64url) =>
+  Uint8Array.from(atob(base64url.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+
+// Affiche les boutons selon l'état réel de l'abonnement, que le navigateur conserve entre deux visites.
+async function majEtatNotifications() {
+  if (!("PushManager" in window && "Notification" in window && "serviceWorker" in navigator)) {
+    $("#btn-notifs").hidden = true;
+    $("#notifs-message").textContent =
+      "Les notifications push ne sont pas disponibles dans ce navigateur. Sur iPhone, installez d'abord Aplomb sur l'écran d'accueil.";
+    return null;
+  }
+  const reg = await navigator.serviceWorker.getRegistration();
+  const abonnement = (await reg?.pushManager.getSubscription()) ?? null;
+  $("#btn-notifs").hidden = Boolean(abonnement);
+  $("#btn-notifs-test").hidden = $("#btn-notifs-off").hidden = !abonnement;
+  return abonnement;
+}
+
+async function activerNotifications() {
+  const message = $("#notifs-message");
+  message.textContent = "";
+  // Demandée ici seulement : après un geste, et juste sous le texte qui explique à quoi elle sert.
+  if ((await Notification.requestPermission()) !== "granted") {
+    message.textContent =
+      "Notifications refusées : Aplomb fonctionne sans, l'état de chaque relevé reste visible dans cette liste. " +
+      "Vous pourrez les autoriser plus tard dans les réglages du site.";
+    return;
+  }
+  try {
+    const headers = await enTetesApi();
+    const cle = await fetch("/api/push", { headers });
+    if (!cle.ok) throw new Error(`Clé VAPID indisponible (${cle.status})`);
+    const { clePublique } = await cle.json();
+    const reg = await navigator.serviceWorker.ready;
+    const abonnement = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: cleEnOctets(clePublique),
+    });
+    const depot = await fetch("/api/push", { method: "PUT", headers, body: JSON.stringify(abonnement) });
+    if (!depot.ok) {
+      await abonnement.unsubscribe(); // pas d'abonnement que le serveur ne connaît pas
+      throw new Error(`Abonnement refusé (${depot.status})`);
+    }
+    toast("Notifications activées.");
+  } catch {
+    message.textContent = "Activation impossible pour l'instant : une connexion au serveur est nécessaire. Réessayez en ligne.";
+  }
+  await majEtatNotifications();
+}
+
+async function desactiverNotifications() {
+  const abonnement = await majEtatNotifications();
+  await abonnement?.unsubscribe();
+  // Hors ligne, la suppression côté serveur échoue : il s'en apercevra au prochain envoi (réponse 410).
+  await fetch("/api/push", { method: "DELETE", headers: await enTetesApi() }).catch(() => {});
+  await majEtatNotifications();
+  toast("Notifications désactivées.");
+}
+
+async function testerNotification() {
+  const rep = await fetch("/api/push/test", { method: "POST", headers: await enTetesApi() }).catch(() => null);
+  toast(rep?.ok ? "Notification de test envoyée." : "Envoi impossible : vérifiez la connexion.");
 }
 
 // ---------------------------------------------------------------- Installation
@@ -378,6 +448,9 @@ async function demarrer() {
   $("#btn-raz-etalonnage").addEventListener("click", annulerEtalonnage);
   $("#ecran-allume").addEventListener("change", majEcranAllume);
   $("#btn-sync").addEventListener("click", () => synchroniser({ manuel: true }));
+  $("#btn-notifs").addEventListener("click", activerNotifications);
+  $("#btn-notifs-off").addEventListener("click", desactiverNotifications);
+  $("#btn-notifs-test").addEventListener("click", testerNotification);
   $("#btn-installer").addEventListener("click", async () => {
     if (!invitationInstallation) return;
     invitationInstallation.prompt();
@@ -395,6 +468,7 @@ async function demarrer() {
   etalonnage = (await DB.get("meta", "etalonnage")) ?? etalonnage;
   await afficherReleves();
   await enregistrerServiceWorker();
+  await majEtatNotifications();
   synchroniser();
 }
 

@@ -219,6 +219,12 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
 .etat-refuse { color: var(--erreur); }
 .releve button { min-height: 2rem; padding: 0 0.6rem; font-size: 0.85rem; }
 
+.notifications { margin-top: 1.5rem; }
+.notifications h3 { margin-top: 0; }
+.notifications .actions { justify-content: flex-start; }
+#notifs-message { margin-bottom: 0; }
+#notifs-message:empty { display: none; }
+
 .toast {
   position: fixed;
   left: 50%;

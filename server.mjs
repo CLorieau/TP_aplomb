@@ -10,6 +10,12 @@ const PORT = process.env.PORT || 8080;
 const RACINE = fileURLToPath(new URL("./public", import.meta.url));
 const DONNEES = fileURLToPath(new URL("./.data/releves.json", import.meta.url));
 
+// Notifications push : actives seulement si `npm install` a été lancé et si .env contient les clés VAPID.
+try {
+  process.loadEnvFile(fileURLToPath(new URL("./.env", import.meta.url)));
+} catch {}
+const push = await import("./api/push.mjs").then((m) => m.creerPush(process.env)).catch(() => null);
+
 const TYPES = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -59,6 +65,7 @@ async function repondreApi(req, res) {
       body: avecCorps ? Buffer.concat(morceaux) : undefined,
     }),
     stockage,
+    push,
   );
   res.writeHead(reponse.status, Object.fromEntries(reponse.headers));
   res.end(Buffer.from(await reponse.arrayBuffer()));
@@ -87,4 +94,4 @@ createServer(async (req, res) => {
     if (!res.headersSent) res.writeHead(500);
     res.end();
   }
-}).listen(PORT, () => console.log(`Aplomb : http://localhost:${PORT}`));
+}).listen(PORT, () => console.log(`Aplomb : http://localhost:${PORT} (notifications push ${push ? "actives" : "désactivées"})`));

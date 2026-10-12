@@ -9,6 +9,6 @@
 
 ## Technique
 
-- Vanilla : Service Worker, API Cache, IndexedDB, Background Sync, Web App Manifest
+- Vanilla : Service Worker, API Cache, IndexedDB, Background Sync, Web Push, Web App Manifest
 - Capteurs : DeviceOrientationEvent (niveau, boussole), Screen Wake Lock
 - Serveur : Netlify Functions et Netlify Blobs

@@ -6,16 +6,22 @@
 // Réponses après lesquelles réessayer ne changerait rien : la requête est retirée de l'outbox.
 const REFUS_DEFINITIFS = [400, 413];
 
+// Au-delà de ce délai entre la mesure et l'envoi, le relevé est considéré comme « pris hors ligne ».
+const DELAI_DIFFERE = 30_000;
+
 async function envoyerOutbox() {
   const deviceId = await getDeviceId();
   let traites = 0;
 
   for (const item of await DB.getAll("outbox")) { // triés par seq : l'ordre des actions est respecté
     const suppression = item.op === "delete";
+    const headers = { "Content-Type": "application/json", "X-Device-Id": deviceId };
+    // Relevé resté en attente : le serveur le confirmera par une notification push, utile si l'app est fermée.
+    if (!suppression && Date.now() - item.releve.createdAt > DELAI_DIFFERE) headers["X-Differe"] = "1";
     // Un échec réseau fait lever fetch : on s'arrête là, le reste de l'outbox attend le prochain essai.
     const res = await fetch(`/api/releves/${item.id}`, {
       method: suppression ? "DELETE" : "PUT", // PUT avec l'id du client : rejouer la requête ne crée pas de doublon
-      headers: { "Content-Type": "application/json", "X-Device-Id": deviceId },
+      headers,
       body: suppression ? undefined : JSON.stringify(item.releve),
     });
     if (!res.ok && !REFUS_DEFINITIFS.includes(res.status)) {
