@@ -34,6 +34,7 @@ public/               servi tel quel par Netlify
   manifest.json, icons/
   robots.txt, sitemap.xml, llms.txt, outils.md
   _headers            en-têtes HTTP (CSP, noindex sur le Markdown…)
+  .well-known/assetlinks.json  App Link : autorise l'app Android Aplomb (../aplomb_android) à ouvrir les URL du site
 api/releves.mjs       logique de l'API, partagée par les deux serveurs
 api/push.mjs          envoi des notifications push (web-push, VAPID)
 netlify/functions/    l'API en production (Netlify Functions + Netlify Blobs)
